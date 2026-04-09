@@ -13,8 +13,29 @@ Git and SSH configs are managed locally per device (not in this repo).
 | File | Purpose |
 |---|---|
 | `.claude/CLAUDE.md` | Global instructions — behavior rules, commit style, PR preferences |
-| `.claude/settings.json` | Global settings — statusline config, preferences |
+| `.claude/settings.json` | Global settings — statusline config, preferences (**not tracked — see below**) |
 | `.claude/statusline-command.sh` | Custom status line: dir, branch, model, context, token burn, timestamp |
+
+### settings.json (not tracked)
+
+`.claude/settings.json` contains API keys and machine-specific config, so it's gitignored. Create it manually on each device:
+
+```bash
+cat > ~/.claude/settings.json << 'EOF'
+{
+  "env": {
+    "ANTHROPIC_API_KEY": "<your-api-key>",
+    "ANTHROPIC_BASE_URL": "<your-base-url>"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline-command.sh\""
+  }
+}
+EOF
+```
+
+Adjust env vars as needed for your setup.
 
 ### Slash Commands
 
