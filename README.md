@@ -1,6 +1,8 @@
 # dotfiles
 
-Personal machine config — Claude Code setup and git/SSH credentials.
+Personal machine config — Claude Code setup, shared across devices.
+
+Git and SSH configs are managed locally per device (not in this repo).
 
 ---
 
@@ -26,62 +28,66 @@ Run these inside any Claude Code session. They enforce better prompting habits.
 
 ---
 
-## Git & SSH
+## How symlinks work
 
-### Config files
+`install.sh` creates symlinks from `~/.claude/` to the files in this repo. The symlinked files are not copies — they point directly to the repo files. That means:
 
-| File | Purpose |
-|---|---|
-| `.gitconfig` | Global git config — defaults to work (Deloitte) account |
-| `.gitconfig-personal` | Personal git identity, auto-applied under `~/Desktop/Projects/Other/` |
-| `.ssh/config` | SSH host aliases for work (`github-work`) and personal (`github-personal`) |
-
-### SSH host aliases
-
-| Alias | Account | Key |
-|---|---|---|
-| `github-work` | jmachalek@deloitte.com | `~/.ssh/id_ed25519_work` |
-| `github-personal` | Josie29 (01josie@gmail.com) | `~/.ssh/id_ed25519_personal` |
-
-Use the alias instead of `github.com` in remote URLs:
-```bash
-git remote add origin git@github-personal:Josie29/my-repo.git
-```
+- **Edits are instant.** Changing `~/dotfiles/.claude/settings.json` (or `~/.claude/settings.json` — same file) takes effect immediately. No re-linking needed.
+- **`git pull` updates everything.** Pulling new changes on another device updates the repo files, and the symlinks already point there. Nothing else to do.
+- **No need to re-run `install.sh`** unless you add a new file to the repo that needs a new symlink.
 
 ---
 
 ## Setup on a new machine
 
-**Prerequisites:** Claude Code installed, `~/.claude` directory exists.
+### 1. SSH key for personal GitHub
+
+Generate or copy your personal SSH key:
 
 ```bash
-git clone git@github-personal:Josie29/dotfiles.git ~/dotfiles
-mkdir -p ~/.claude
-~/dotfiles/install.sh
+ssh-keygen -t ed25519 -C "01josie@gmail.com" -f ~/.ssh/id_ed25519_josie29
 ```
 
-> SSH uses the `github-personal` host alias — make sure `~/.ssh/config` has that entry and `~/.ssh/id_ed25519_personal` exists before cloning.
+Add the public key to GitHub (Settings → SSH Keys), then configure `~/.ssh/config`:
 
-### SSH keys (not committed — handle manually)
-
-**Option A: Generate new keys**
-```bash
-ssh-keygen -t ed25519 -C "jmachalek@deloitte.com" -f ~/.ssh/id_ed25519_work
-ssh-keygen -t ed25519 -C "01josie@gmail.com" -f ~/.ssh/id_ed25519_personal
 ```
-Add each `.pub` file to the respective GitHub account under Settings → SSH Keys.
-
-**Option B: Copy from old machine**
-```bash
-scp ~/.ssh/id_ed25519_work user@newmachine:~/.ssh/
-scp ~/.ssh/id_ed25519_personal user@newmachine:~/.ssh/
-chmod 600 ~/.ssh/id_ed25519_work ~/.ssh/id_ed25519_personal
+Host github-other
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_josie29
 ```
 
-**Verify:**
+Verify: `ssh -T git@github-other`
+
+### 2. Clone and install
+
 ```bash
-ssh -T git@github-work
-ssh -T git@github-personal
+git clone git@github-other:Josie29/dotfiles.git ~/dotfiles
+bash ~/dotfiles/install.sh
+```
+
+### 3. Git config (per device)
+
+Create `~/.gitconfig` and `~/.gitconfig-personal` locally — these are **not** in this repo since work email/paths differ per device.
+
+```ini
+# ~/.gitconfig
+[user]
+    name = Josie Machalek
+    email = your-work-email@company.com
+[core]
+    editor = nano
+
+# Use personal identity for specific dirs
+[includeIf "gitdir:~/dotfiles/"]
+    path = ~/.gitconfig-personal
+```
+
+```ini
+# ~/.gitconfig-personal
+[user]
+    name = josie29
+    email = 01josie@gmail.com
 ```
 
 ---
@@ -101,4 +107,3 @@ To add a new slash command, just add a `.md` file to `.claude/commands/` — no 
 - **Shell config** — `.zshrc`, `.vimrc` using the same move + symlink pattern
 - **CLAUDE.md templates** — boilerplate for new project types (FastAPI, React, etc.) to copy when starting a project
 - **Bootstrap script** — `bootstrap.sh` that installs Homebrew, Claude Code, and tools on a fresh Mac
-- **Per-machine overrides** — `machines/` folder with machine-specific settings `install.sh` detects and applies
