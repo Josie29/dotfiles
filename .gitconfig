@@ -1,0 +1,11 @@
+# Default: work account
+[user]
+	name = Josie Machalek
+	email = jmachalek@deloitte.com
+
+[push]
+	default = current
+
+# Personal account for Projects/Other
+[includeIf "gitdir:~/Desktop/Projects/Other/"]
+	path = ~/.gitconfig-personal
