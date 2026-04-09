@@ -1,0 +1,14 @@
+{
+  "env": {
+    "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+  },
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.google.com)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/jmachalek/.claude/statusline-command.sh"
+  }
+}
