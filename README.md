@@ -10,6 +10,7 @@ Personal machine config — Claude Code setup and git/SSH credentials.
 
 | File | Purpose |
 |---|---|
+| `.claude/CLAUDE.md` | Global instructions — behavior rules, commit style, PR preferences |
 | `.claude/settings.json` | Global settings — statusline config, preferences |
 | `.claude/statusline-command.sh` | Custom status line: dir, branch, model, context, token burn, timestamp |
 
