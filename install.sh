@@ -7,10 +7,6 @@ ln -sf ~/dotfiles/.claude/statusline-command.sh ~/.claude/statusline-command.sh
 ln -sf ~/dotfiles/.claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -sf ~/dotfiles/.claude/commands ~/.claude/commands
 
-# Git
-ln -sf ~/dotfiles/.gitconfig ~/.gitconfig
-ln -sf ~/dotfiles/.gitconfig-personal ~/.gitconfig-personal
-
 # SSH
 mkdir -p ~/.ssh
 ln -sf ~/dotfiles/.ssh/config ~/.ssh/config
