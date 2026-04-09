@@ -8,6 +8,9 @@ Personal machine config, currently focused on Claude Code setup.
 |---|---|
 | `.claude/settings.json` | Claude Code global settings (statusline, preferences) |
 | `.claude/statusline-command.sh` | Custom status line script |
+| `.claude/commands/spec.md` | `/spec` — forces a detailed spec before any code is written |
+| `.claude/commands/review.md` | `/review` — grills you on changes before allowing a PR |
+| `.claude/commands/elegant.md` | `/elegant` — scraps a messy fix and rewrites it cleanly |
 | `.gitconfig` | Global git config — defaults to work (Deloitte) account |
 | `.gitconfig-personal` | Personal git identity, auto-applied under `~/Desktop/Projects/Other/` |
 | `.ssh/config` | SSH host aliases for work (`github-work`) and personal (`github-personal`) accounts |
