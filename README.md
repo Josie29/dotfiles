@@ -1,20 +1,53 @@
 # dotfiles
 
-Personal machine config, currently focused on Claude Code setup.
+Personal machine config — Claude Code setup and git/SSH credentials.
 
-## What's in here
+---
+
+## Claude Code
+
+### Settings
 
 | File | Purpose |
 |---|---|
-| `.claude/settings.json` | Claude Code global settings (statusline, preferences) |
-| `.claude/statusline-command.sh` | Custom status line script |
-| `.claude/commands/spec.md` | `/spec` — forces a detailed spec before any code is written |
-| `.claude/commands/review.md` | `/review` — grills you on changes before allowing a PR |
-| `.claude/commands/elegant.md` | `/elegant` — scraps a messy fix and rewrites it cleanly |
+| `.claude/settings.json` | Global settings — statusline config, preferences |
+| `.claude/statusline-command.sh` | Custom status line: dir, branch, model, context, token burn, timestamp |
+
+### Slash Commands
+
+Run these inside any Claude Code session. They enforce better prompting habits.
+
+| Command | When to use | What it does |
+|---|---|---|
+| `/spec` | Before writing any code | Walks through goal, constraints, edge cases, then challenges the spec before touching files |
+| `/review` | After writing code, before a PR | Grills you on correctness, security, side effects — gives a pass/fail verdict |
+| `/elegant` | After a working-but-messy fix | Scraps the current approach and rewrites it cleanly |
+
+---
+
+## Git & SSH
+
+### Config files
+
+| File | Purpose |
+|---|---|
 | `.gitconfig` | Global git config — defaults to work (Deloitte) account |
 | `.gitconfig-personal` | Personal git identity, auto-applied under `~/Desktop/Projects/Other/` |
-| `.ssh/config` | SSH host aliases for work (`github-work`) and personal (`github-personal`) accounts |
-| `install.sh` | Symlinks everything to the right places |
+| `.ssh/config` | SSH host aliases for work (`github-work`) and personal (`github-personal`) |
+
+### SSH host aliases
+
+| Alias | Account | Key |
+|---|---|---|
+| `github-work` | jmachalek@deloitte.com | `~/.ssh/id_ed25519_work` |
+| `github-personal` | Josie29 (01josie@gmail.com) | `~/.ssh/id_ed25519_personal` |
+
+Use the alias instead of `github.com` in remote URLs:
+```bash
+git remote add origin git@github-personal:Josie29/my-repo.git
+```
+
+---
 
 ## Setup on a new machine
 
@@ -26,36 +59,31 @@ mkdir -p ~/.claude
 ~/dotfiles/install.sh
 ```
 
-> Note: SSH uses the `github-personal` host alias. Make sure `~/.ssh/config` has that entry and `~/.ssh/id_ed25519_personal` exists on the new machine.
+> SSH uses the `github-personal` host alias — make sure `~/.ssh/config` has that entry and `~/.ssh/id_ed25519_personal` exists before cloning.
 
-## Manual steps on a new machine (SSH keys)
+### SSH keys (not committed — handle manually)
 
-SSH private keys are never committed — you need to handle them separately.
-
-**Option A: Generate new keys on the new machine**
+**Option A: Generate new keys**
 ```bash
 ssh-keygen -t ed25519 -C "jmachalek@deloitte.com" -f ~/.ssh/id_ed25519_work
 ssh-keygen -t ed25519 -C "01josie@gmail.com" -f ~/.ssh/id_ed25519_personal
 ```
-Then add each public key to the respective GitHub account:
-- Work: GitHub Enterprise → Settings → SSH Keys → paste `~/.ssh/id_ed25519_work.pub`
-- Personal: github.com → Settings → SSH Keys → paste `~/.ssh/id_ed25519_personal.pub`
+Add each `.pub` file to the respective GitHub account under Settings → SSH Keys.
 
-**Option B: Copy existing keys from your old machine**
+**Option B: Copy from old machine**
 ```bash
 scp ~/.ssh/id_ed25519_work user@newmachine:~/.ssh/
 scp ~/.ssh/id_ed25519_personal user@newmachine:~/.ssh/
-```
-Then fix permissions on the new machine:
-```bash
 chmod 600 ~/.ssh/id_ed25519_work ~/.ssh/id_ed25519_personal
 ```
 
-**Test it's working:**
+**Verify:**
 ```bash
 ssh -T git@github-work
 ssh -T git@github-personal
 ```
+
+---
 
 ## Adding new dotfiles
 
@@ -63,10 +91,13 @@ ssh -T git@github-personal
 2. Add a symlink line to `install.sh`
 3. Commit and push
 
+To add a new slash command, just add a `.md` file to `.claude/commands/` — no `install.sh` change needed since the whole directory is symlinked.
+
+---
+
 ## Ideas for extending this
 
-- **Shell config** — add `.zshrc`, `.gitconfig`, `.vimrc` using the same move + symlink pattern
+- **Shell config** — `.zshrc`, `.vimrc` using the same move + symlink pattern
 - **CLAUDE.md templates** — boilerplate for new project types (FastAPI, React, etc.) to copy when starting a project
-- **Bootstrap script** — a `bootstrap.sh` that installs Homebrew, Claude Code, and other tools on a fresh Mac so you go from zero to ready in one command
-- **Per-machine overrides** — a `machines/` folder with machine-specific settings that `install.sh` detects and applies
-- **Secrets documentation** — a `.env.example` pattern to document what env vars are needed without committing real values
+- **Bootstrap script** — `bootstrap.sh` that installs Homebrew, Claude Code, and tools on a fresh Mac
+- **Per-machine overrides** — `machines/` folder with machine-specific settings `install.sh` detects and applies
