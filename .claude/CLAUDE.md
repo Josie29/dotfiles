@@ -15,16 +15,25 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 
 ## Code Quality
 
-- Write production-level code: prioritize readability, maintainability, clear naming, and appropriate abstraction. Use type hints. Match existing patterns and style.
+- Write production-level code: prioritize readability, maintainability, clear naming, and appropriate abstraction. Match existing patterns and style.
 - Validate inputs and handle missing or malformed data. Use try/except only where you can handle or meaningfully report the failure. Prefer specific exception types; avoid bare `except`. Log errors with enough context to debug.
-- Every function should have a docstring. Use the project's existing docstring style; default to Google style if none is established.
+
+### Type Hints
+
+- Use type hints liberally — all function signatures (params and return), class attributes, and any variable where the type isn't obvious from the assignment. Prefer `X | None` over `Optional[X]`.
+
+### Docstrings
+
+- Every function gets a Google-style docstring unless it's trivially simple (e.g., one-line getters/setters with a clear name).
+- Include `Args`, `Returns`, and `Raises` sections as applicable — always document `Raises` when a function can throw.
+- In non-Python languages, apply the same spirit: JSDoc for TypeScript/JavaScript, `///` doc comments for Rust, etc.
 
 ## Commit Messages
 
 - Always run `git diff --staged` before drafting a commit message
 - The title and body must reflect ALL staged changes — not just the files that prompted the task
 - If there are changes beyond the immediate task, include them in the body as bullet points
-- Do NOT add a `Co-Authored-By` trailer or any AI attribution to commit messages
+- Do not add AI attribution or Co-Authored-By lines to commit messages
 
 ## Code Style
 - Use enums (Python `Enum`/`StrEnum`) instead of string literals for any fixed option set — especially values shared across module boundaries or between layers. Suggest migrating bare string comparisons to enums when encountered.
