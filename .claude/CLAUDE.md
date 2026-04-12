@@ -2,6 +2,10 @@
 
 Rules that apply across all projects. Project-level CLAUDE.md adds to or overrides these.
 
+## Communication
+
+- Do not use emojis in messages or code unless explicitly asked
+
 ## Working Approach
 
 - Before implementing anything non-trivial, flag ambiguities and potential failure modes first — don't just start writing code. Consider: dependencies, edge cases, config, backwards compatibility, observability, and security. Ask a short, pointed question rather than assuming.
@@ -20,6 +24,7 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 - Always run `git diff --staged` before drafting a commit message
 - The title and body must reflect ALL staged changes — not just the files that prompted the task
 - If there are changes beyond the immediate task, include them in the body as bullet points
+- Do NOT add a `Co-Authored-By` trailer or any AI attribution to commit messages
 
 ## Code Style
 - Use enums (Python `Enum`/`StrEnum`) instead of string literals for any fixed option set — especially values shared across module boundaries or between layers. Suggest migrating bare string comparisons to enums when encountered.
