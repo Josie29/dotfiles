@@ -37,6 +37,7 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 
 ## Code Style
 - Use enums (Python `Enum`/`StrEnum`) instead of string literals for any fixed option set — especially values shared across module boundaries or between layers. Suggest migrating bare string comparisons to enums when encountered.
+- Add inline comments for moderately rare operations (e.g., floor division `//`, modulo `%` for field extraction, bitwise ops, set comprehensions for lookup optimization) — anything a reader might need to pause and parse.
 
 ## Pull Requests
 
