@@ -64,3 +64,11 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 - Prefer flexbox/grid over `position: absolute/fixed` for layout. Use positioning only to break out of document flow intentionally.
 - For mobile web, prefer `dvh` over `vh` to account for dynamic browser chrome.
 - These conventions apply to web. React Native / Flutter use density-independent units natively — px-equivalent values are standard there.
+
+## Compact Instructions
+
+When compacting, preserve:
+- Current task objective and any unresolved blockers
+- Decisions made and approaches explicitly rejected (avoid revisiting)
+- Open questions awaiting user input
+- File paths and line numbers actively being worked on
