@@ -24,6 +24,7 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 
 ### Docstrings
 
+- Do not add module-level docstrings to Python files. Function and class docstrings are sufficient.
 - Every function gets a Google-style docstring unless it's trivially simple (e.g., one-line getters/setters with a clear name).
 - Include `Args`, `Returns`, and `Raises` sections as applicable — always document `Raises` when a function can throw.
 - In non-Python languages, apply the same spirit: JSDoc for TypeScript/JavaScript, `///` doc comments for Rust, etc.
@@ -42,6 +43,12 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 - Test behavior, not implementation. Assert on what the user sees or what the API returns, not on internal state or method calls. Tests that check internals break on every refactor without catching real bugs.
 - Don't test what the framework or type system already enforces. If Pydantic validates a required field, don't write a test asserting it's required. If FastAPI returns 422 on bad input, that's framework behavior.
 - Prefer integration-level tests for API endpoints — hit the route with a realistic payload and assert on the response, rather than mocking every dependency and testing the handler in isolation.
+
+## Pydantic Models
+
+- When a function returns more than two related values, define a Pydantic model for the return type rather than using raw tuples or NamedTuples. Keep the pattern consistent with the rest of the codebase.
+- Prefer composition over inheritance for Pydantic models — embed a model as a field rather than subclassing. This keeps the relationship explicit and avoids hidden field inheritance.
+- Don't introduce new patterns (e.g., NamedTuple) when the codebase already uses Pydantic for structured data. Match existing conventions.
 
 ## Code Style
 - Use enums (Python `Enum`/`StrEnum`) instead of string literals for any fixed option set — especially values shared across module boundaries or between layers. Suggest migrating bare string comparisons to enums when encountered.
