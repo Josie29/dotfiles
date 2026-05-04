@@ -75,6 +75,7 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 - Prefer flexbox/grid over `position: absolute/fixed` for layout. Use positioning only to break out of document flow intentionally.
 - For mobile web, prefer `dvh` over `vh` to account for dynamic browser chrome.
 - These conventions apply to web. React Native / Flutter use density-independent units natively — px-equivalent values are standard there.
+- Prefer TypeScript over JavaScript for any new file. Use `.tsx` for React components and `.ts` for everything else. In existing JS-only codebases, write new files as TS rather than triggering a full migration — Next.js and Vite both support mixing `.jsx`/`.tsx` in the same project.
 
 ## Compact Instructions
 
