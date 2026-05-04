@@ -6,6 +6,10 @@ Rules that apply across all projects. Project-level CLAUDE.md adds to or overrid
 
 - Do not use emojis in messages or code unless explicitly asked
 
+## Session Management
+
+- If the session hasn't been renamed after the first substantive exchange, suggest a short descriptive name using `/rename` (e.g., `/rename fix_auth_retry`). This helps the user keep terminal tabs organized.
+
 ## Working Approach
 
 - Before implementing anything non-trivial, flag ambiguities and potential failure modes first — don't just start writing code. Consider: dependencies, edge cases, config, backwards compatibility, observability, and security. Ask a short, pointed question rather than assuming.
