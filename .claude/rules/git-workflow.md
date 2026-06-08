@@ -1,3 +1,7 @@
+# Branches
+
+- Name feature branches `feature/<description>` with a short kebab-case description (e.g., `feature/rules-refactor`).
+
 # Commit Messages
 
 - Always run `git diff --staged` before drafting a commit message
