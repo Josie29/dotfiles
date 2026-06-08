@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Keep the flattened rules view (.claude/CLAUDE.rendered.md) in sync with the
+# source rule files on every commit.
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+"$REPO_ROOT/.claude/render-rules.sh" >/dev/null
+git add "$REPO_ROOT/.claude/CLAUDE.rendered.md"
