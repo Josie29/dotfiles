@@ -2,109 +2,12 @@
 
 Rules that apply across all projects. Project-level CLAUDE.md adds to or overrides these.
 
-## Communication
+Rules are split into topic files under `~/.claude/rules/` and imported below. Add new global rules by creating a new file in `rules/` and adding an `@`-import here.
 
-- Do not use emojis in messages or code unless explicitly asked
-
-## Session Management
-
-- If the session hasn't been renamed after the first substantive exchange, suggest a short descriptive name using `/rename` (e.g., `/rename fix_auth_retry`). This helps the user keep terminal tabs organized.
-
-## Working Approach
-
-- Before implementing anything non-trivial, flag ambiguities and potential failure modes first — don't just start writing code. Consider: dependencies, edge cases, config, backwards compatibility, observability, and security. Ask a short, pointed question rather than assuming.
-- After delivering a working-but-messy fix, proactively offer the cleaner alternative ("knowing everything now, here's the elegant approach").
-- When asked to review, challenge the approach skeptically — don't just validate it.
-- When a preference or convention surfaces in conversation that isn't already in a CLAUDE.md, suggest adding it — recommend global if it's a personal working style (formatting, merge strategy, code style) or project-level if it's specific to the stack or codebase
-
-## Skill Development
-
-I'm actively working on improving at two Claude Code disciplines:
-
-1. **Harness engineering** — CLAUDE.md, hooks, slash commands, sub-agents, skills, MCP, permissions, memory.
-2. **Spec-driven development** — writing specs before code, using plan mode, defining acceptance criteria and non-goals.
-
-Help me improve at both by surfacing concrete improvement opportunities when they arise in our actual work. Trigger a suggestion when you notice friction with a harness or spec answer:
-
-- I correct the same thing twice → propose a CLAUDE.md line or hook
-- I'm about to start a non-trivial task without one → propose `/spec` or plan mode
-- A permission prompt fires for something obviously safe → propose an allowlist entry
-- Broad searching is about to burn main-context tokens → propose an Explore sub-agent
-- A multi-step manual workflow recurs → propose a slash command or skill
-- A preference or fact surfaces that should outlive the session → propose a memory entry
-
-Suggestions should be:
-- **Concrete** — name the specific hook, permission, memory entry, or skill, not "use sub-agents more"
-- **Brief** — one or two sentences, easy to decline
-- **Well-timed** — at a natural breakpoint, not mid-implementation
-- **Friction-driven** — tied to something that actually happened in this conversation, not aspirational
-
-Don't repeat a suggestion I've already declined in this session. If I take one up, walk me through the mechanics so I learn the lever, not just the result.
-
-## Code Quality
-
-- Write production-level code: prioritize readability, maintainability, clear naming, and appropriate abstraction. Match existing patterns and style.
-- Validate inputs and handle missing or malformed data. Use try/except only where you can handle or meaningfully report the failure. Prefer specific exception types; avoid bare `except`. Log errors with enough context to debug.
-
-### Type Hints
-
-- Use type hints liberally — all function signatures (params and return), class attributes, and any variable where the type isn't obvious from the assignment. Prefer `X | None` over `Optional[X]`.
-
-### Docstrings
-
-- Do not add module-level docstrings to Python files. Function and class docstrings are sufficient.
-- Every function gets a Google-style docstring unless it's trivially simple (e.g., one-line getters/setters with a clear name).
-- Include `Args`, `Returns`, and `Raises` sections as applicable — always document `Raises` when a function can throw.
-- In non-Python languages, apply the same spirit: JSDoc for TypeScript/JavaScript, `///` doc comments for Rust, etc.
-
-## Commit Messages
-
-- Always run `git diff --staged` before drafting a commit message
-- The title and body must reflect ALL staged changes — not just the files that prompted the task
-- If there are changes beyond the immediate task, include them in the body as bullet points
-- Do not add AI attribution or Co-Authored-By lines to commit messages
-
-## Testing
-
-- Keep tests in a dedicated directory, not alongside source files. Backend: `backend/tests/`. Frontend: `src/__tests__/`. Match the existing pattern when adding new test files.
-- Every non-trivial test needs a comment explaining what user-facing behavior breaks if the test is removed. Not "tests updateFormData" but "catches the bug where changing material shows a stale estimate."
-- Test behavior, not implementation. Assert on what the user sees or what the API returns, not on internal state or method calls. Tests that check internals break on every refactor without catching real bugs.
-- Don't test what the framework or type system already enforces. If Pydantic validates a required field, don't write a test asserting it's required. If FastAPI returns 422 on bad input, that's framework behavior.
-- Prefer integration-level tests for API endpoints — hit the route with a realistic payload and assert on the response, rather than mocking every dependency and testing the handler in isolation.
-
-## Pydantic Models
-
-- When a function returns more than two related values, define a Pydantic model for the return type rather than using raw tuples or NamedTuples. Keep the pattern consistent with the rest of the codebase.
-- Prefer composition over inheritance for Pydantic models — embed a model as a field rather than subclassing. This keeps the relationship explicit and avoids hidden field inheritance.
-- Don't introduce new patterns (e.g., NamedTuple) when the codebase already uses Pydantic for structured data. Match existing conventions.
-
-## Code Style
-- Use enums (Python `Enum`/`StrEnum`) instead of string literals for any fixed option set — especially values shared across module boundaries or between layers. Suggest migrating bare string comparisons to enums when encountered.
-- When using non-obvious format specifiers or Unicode escapes, add an inline comment explaining what it does — e.g. `f"{val:.0f}\u00b0"  # Format as whole number then unicode degree symbol`
-- Add inline comments for moderately rare operations (e.g., floor division `//`, modulo `%` for field extraction, bitwise ops, set comprehensions for lookup optimization) — anything a reader might need to pause and parse.
-
-## Pull Requests
-
-- Do not add "Generated with Claude Code" or any AI attribution footer to PR descriptions
-- Default to squash merge — suggest it when merging PRs unless the user specifies otherwise
-- Structure PR descriptions with `## Added`, `## Modified`, and `## Removed` sections (omit any that are empty) rather than a generic `## Summary`
-
-## Frontend
-
-- Use `rem` for font sizes, spacing, padding, and margins — not `px`. Reserve `px` for borders, shadows, and sub-4px details. Use `em` for component-relative sizing.
-- Use a consistent spacing scale (multiples of 0.25rem / 4px). Avoid arbitrary magic numbers.
-- Define colors, fonts, and breakpoints as CSS custom properties or design tokens — no hardcoded values scattered in components.
-- Write mobile-first CSS: base styles for small screens, `min-width` breakpoints to scale up.
-- Prefer semantic HTML (`<button>`, `<nav>`, `<section>`) over ARIA roles on generic elements.
-- Prefer flexbox/grid over `position: absolute/fixed` for layout. Use positioning only to break out of document flow intentionally.
-- For mobile web, prefer `dvh` over `vh` to account for dynamic browser chrome.
-- These conventions apply to web. React Native / Flutter use density-independent units natively — px-equivalent values are standard there.
-- Prefer TypeScript over JavaScript for any new file. Use `.tsx` for React components and `.ts` for everything else. In existing JS-only codebases, write new files as TS rather than triggering a full migration — Next.js and Vite both support mixing `.jsx`/`.tsx` in the same project.
-
-## Compact Instructions
-
-When compacting, preserve:
-- Current task objective and any unresolved blockers
-- Decisions made and approaches explicitly rejected (avoid revisiting)
-- Open questions awaiting user input
-- File paths and line numbers actively being worked on
+@rules/communication.md
+@rules/working-approach.md
+@rules/code-quality.md
+@rules/testing.md
+@rules/git-workflow.md
+@rules/frontend.md
+@rules/compact.md
