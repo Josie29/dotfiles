@@ -1,0 +1,8 @@
+# Brewfile.mac — GUI apps (casks), Mac-only
+# Casks don't exist on Linux, so keep these separate from Brewfile
+# Install with: brew bundle --file=Brewfile.mac
+
+cask "docker"
+cask "visual-studio-code"
+cask "iterm2" # optional
+

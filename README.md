@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal machine config — Claude Code setup, shared across devices.
+Personal machine config — Claude Code setup and Homebrew packages, shared across devices.
 
 Git and SSH configs are managed locally per device (not in this repo).
 
@@ -18,7 +18,7 @@ Git and SSH configs are managed locally per device (not in this repo).
 
 ### settings.json (not tracked)
 
-`.claude/settings.json` contains API keys and machine-specific config, so it's gitignored. Create it manually on each device:
+`.claude/settings.json` contains API keys and machine-specific config, so it's gitignored and **not symlinked** by `install.sh`. Create it manually on each device:
 
 ```bash
 cat > ~/.claude/settings.json << 'EOF'
@@ -35,7 +35,7 @@ cat > ~/.claude/settings.json << 'EOF'
 EOF
 ```
 
-Adjust env vars as needed for your setup.
+Adjust env vars as needed for your setup (omit the `env` block entirely if you authenticate via subscription).
 
 ### Slash Commands
 
@@ -53,15 +53,44 @@ Run these inside any Claude Code session. They enforce better prompting habits.
 
 `install.sh` creates symlinks from `~/.claude/` to the files in this repo. The symlinked files are not copies — they point directly to the repo files. That means:
 
-- **Edits are instant.** Changing `~/dotfiles/.claude/settings.json` (or `~/.claude/settings.json` — same file) takes effect immediately. No re-linking needed.
+- **Edits are instant.** Changing `~/Projects/dotfiles/.claude/CLAUDE.md` (or `~/.claude/CLAUDE.md` — same file) takes effect immediately. No re-linking needed.
 - **`git pull` updates everything.** Pulling new changes on another device updates the repo files, and the symlinks already point there. Nothing else to do.
 - **No need to re-run `install.sh`** unless you add a new file to the repo that needs a new symlink.
+
+`settings.json` is the exception — it's a real, untracked file, not a symlink (see above).
+
+---
+
+## Homebrew packages
+
+Package installs are declared in Homebrew Bundle files — the manifest is the source of truth, and one command installs everything it lists.
+
+| File | Purpose |
+|---|---|
+| `Brewfile` | CLI tools, cross-platform (git, gh, node, ripgrep, jq, …) |
+| `Brewfile.mac` | GUI apps, Mac-only casks (Docker, VS Code, iTerm2) |
+
+### Adding new tools
+
+- CLI tool that works everywhere → add to `Brewfile`
+- Mac GUI app (cask) → add to `Brewfile.mac`
+- Verify a machine has everything installed: `brew bundle check --file=Brewfile`
+
+Find package names at [formulae.brew.sh](https://formulae.brew.sh) — formulae and casks are searched separately.
 
 ---
 
 ## Setup on a new machine
 
-### 1. SSH key for personal GitHub
+### 1. Install Homebrew
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Skip if it's already installed.
+
+### 2. SSH key for personal GitHub
 
 Generate or copy your personal SSH key:
 
@@ -80,14 +109,32 @@ Host github-other
 
 Verify: `ssh -T git@github-other`
 
-### 2. Clone and install
+### 3. Clone the repo
+
+Clone anywhere — `install.sh` resolves its own location, so the path isn't fixed:
 
 ```bash
-git clone git@github-other:Josie29/dotfiles.git ~/dotfiles
-bash ~/dotfiles/install.sh
+git clone git@github-other:Josie29/dotfiles.git ~/Projects/dotfiles
 ```
 
-### 3. Git config (per device)
+### 4. Install packages
+
+```bash
+brew bundle --file=~/Projects/dotfiles/Brewfile      # CLI tools (Mac + Linux)
+brew bundle --file=~/Projects/dotfiles/Brewfile.mac  # GUI apps (Mac only)
+```
+
+On Linux, run only the first — casks aren't supported.
+
+### 5. Symlink Claude Code config
+
+```bash
+bash ~/Projects/dotfiles/install.sh
+```
+
+Then create `~/.claude/settings.json` by hand — it's untracked, so `install.sh` doesn't manage it (see [settings.json](#settingsjson-not-tracked) above).
+
+### 6. Git config (per device)
 
 Create `~/.gitconfig` and `~/.gitconfig-personal` locally — these are **not** in this repo since work email/paths differ per device.
 
@@ -100,7 +147,7 @@ Create `~/.gitconfig` and `~/.gitconfig-personal` locally — these are **not** 
     editor = nano
 
 # Use personal identity for specific dirs
-[includeIf "gitdir:~/dotfiles/"]
+[includeIf "gitdir:~/Projects/dotfiles/"]
     path = ~/.gitconfig-personal
 ```
 
@@ -115,7 +162,7 @@ Create `~/.gitconfig` and `~/.gitconfig-personal` locally — these are **not** 
 
 ## Adding new dotfiles
 
-1. Move the file into `~/dotfiles/`
+1. Move the file into the repo (`~/Projects/dotfiles/`)
 2. Add a symlink line to `install.sh`
 3. Commit and push
 
@@ -127,4 +174,4 @@ To add a new slash command, just add a `.md` file to `.claude/commands/` — no 
 
 - **Shell config** — `.zshrc`, `.vimrc` using the same move + symlink pattern
 - **CLAUDE.md templates** — boilerplate for new project types (FastAPI, React, etc.) to copy when starting a project
-- **Bootstrap script** — `bootstrap.sh` that installs Homebrew, Claude Code, and tools on a fresh Mac
+- **Bootstrap script** — `bootstrap.sh` that runs the whole new-machine runbook (Homebrew, clone, packages, symlinks) end to end
