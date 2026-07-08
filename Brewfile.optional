@@ -1,0 +1,5 @@
+# Brewfile.optional — situational CLI tools, cross-platform
+# NOT installed by default. Pull these in per-machine only when needed:
+#   brew bundle --file=Brewfile.optional
+
+brew "railway" # Railway CLI — deploy/manage Railway projects

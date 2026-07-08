@@ -70,11 +70,13 @@ Package installs are declared in Homebrew Bundle files — the manifest is the s
 |---|---|
 | `Brewfile` | CLI tools, cross-platform (git, gh, node, ripgrep, jq, …) |
 | `Brewfile.mac` | GUI apps, Mac-only casks (Docker, VS Code, iTerm2) |
+| `Brewfile.optional` | Situational CLI, cross-platform — installed on demand, not by default (railway, …) |
 
 ### Adding new tools
 
 - CLI tool that works everywhere → add to `Brewfile`
 - Mac GUI app (cask) → add to `Brewfile.mac`
+- Situational CLI you don't want on every machine → add to `Brewfile.optional`
 - Verify a machine has everything installed: `brew bundle check --file=Brewfile`
 
 Find package names at [formulae.brew.sh](https://formulae.brew.sh) — formulae and casks are searched separately.
@@ -125,7 +127,7 @@ brew bundle --file=~/Projects/dotfiles/Brewfile      # CLI tools (Mac + Linux)
 brew bundle --file=~/Projects/dotfiles/Brewfile.mac  # GUI apps (Mac only)
 ```
 
-On Linux, run only the first — casks aren't supported.
+On Linux, run only the first — casks aren't supported. Situational tools live in `Brewfile.optional`; install them per-machine when needed with `brew bundle --file=~/Projects/dotfiles/Brewfile.optional`.
 
 ### 5. Symlink Claude Code config
 
