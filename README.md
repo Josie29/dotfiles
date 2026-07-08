@@ -39,13 +39,14 @@ Adjust env vars as needed for your setup (omit the `env` block entirely if you a
 
 ### Slash Commands
 
-Run these inside any Claude Code session. They enforce better prompting habits.
+Run these inside any Claude Code session. Most enforce better prompting habits; some are research utilities.
 
 | Command | When to use | What it does |
 |---|---|---|
 | `/spec` | Before writing any code | Walks through goal, constraints, edge cases, then challenges the spec before touching files |
 | `/review` | After writing code, before a PR | Grills you on correctness, security, side effects — gives a pass/fail verdict |
 | `/elegant` | After a working-but-messy fix | Scraps the current approach and rewrites it cleanly |
+| `/compare <component>` | Choosing between tools/libraries | Web-searches the current landscape, outputs a comparison table, then recommends one scoped to your use case |
 
 ---
 
