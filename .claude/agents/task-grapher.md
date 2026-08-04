@@ -1,6 +1,6 @@
 ---
 name: task-grapher
-description: One-off planning agent. Reads BRIEF.md and all of docs/ to plan concrete implementation tasks. Not part of any workflow — invoked standalone.
+description: One-off planning agent. Reads project context documents to plan concrete implementation tasks. Not part of any workflow — invoked standalone.
 tools: Read, Grep, Glob, Bash
 model: fable
 ---
