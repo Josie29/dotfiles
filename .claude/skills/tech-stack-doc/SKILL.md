@@ -9,6 +9,7 @@ Produce a single markdown doc capturing stack choices and why alternatives were 
 
 ## Steps
 
+0. If a project brief or similar context doc exists or is referenced, read it first.
 1. Determine the layers relevant to this project (e.g. Backend, Frontend, Data persistence, Infra, CI). Don't force layers that don't apply.
 2. For each component decision, pick one choice and a one-line reason.
 3. For each choice, list the alternatives seriously considered and a one-line "why not" each.
