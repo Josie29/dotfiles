@@ -38,6 +38,6 @@ Produce a single markdown doc capturing stack choices and why alternatives were 
 ## Rules
 
 - Column names above are fixed — reuse them verbatim across projects; only the row values change.
-- One row per decision, one line per reason. If a reason needs more than a sentence, it belongs in DECISIONS.md, not here.
+- One row per decision, one line per reason. Full sentences not required.
 - Every "Choice" needs at least one row in "Rejected alternatives" unless it was genuinely uncontested (note why, e.g. "no viable alternative found").
 - Omit the "Open sub-decisions" section entirely if there are none.
