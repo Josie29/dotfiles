@@ -1,80 +1,92 @@
-#!/usr/bin/env bash
-
+#!/bin/sh
 input=$(cat)
 
-# --- Parse fields from JSON input ---
-cwd=$(echo "$input" | jq -r '.cwd // .workspace.current_dir // ""')
-model=$(echo "$input" | jq -r '.model.display_name // ""')
-used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
-ctx_used=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // empty')
-ctx_total=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
-output_tokens=$(echo "$input" | jq -r '.context_window.current_usage.output_tokens // empty')
+model=$(echo "$input" | jq -r '.model.display_name // "Unknown Model"')
+effort=$(echo "$input" | jq -r '.effort.level // empty')
+used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+worktree=$(echo "$input" | jq -r '.worktree.name // empty')
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
+current_dir=$(echo "$input" | jq -r '.worktree.original_cwd // empty')
+rl_5h_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty' | awk '{printf "%.0f", $1}')
+rl_5h_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+rl_7d_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+rl_7d_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
-# --- Current directory (basename) ---
-dir_display=$(basename "$cwd")
-
-# --- Git branch (skip optional locks) ---
-git_branch=""
-if git -C "$cwd" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  git_branch=$(git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
+if [ -n "$used" ]; then
+  used_display=$(printf "%.0f" "$used")
+  usage_str="${used_display}%"
+else
+  usage_str="0%"
 fi
 
-# --- Context usage ---
-ctx_display=""
-if [ -n "$used_pct" ] && [ -n "$ctx_total" ]; then
-  used_fmt=$(printf "%.0f" "$used_pct")
-  # Format context_window_size as e.g. 200k
-  if [ "$ctx_total" -ge 1000 ]; then
-    ctx_total_fmt=$(echo "$ctx_total" | awk '{printf "%dk", $1/1000}')
-  else
-    ctx_total_fmt="${ctx_total}"
+if [ -n "$worktree" ]; then
+  worktree_str="${worktree}"
+else
+  worktree_str="no worktree"
+fi
+
+GREEN='\033[32m'
+YELLOW='\033[33m'
+RED='\033[31m'
+RESET='\033[0m'
+
+git_str=""
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git branch --show-current 2>/dev/null)
+  [ -z "$branch" ] && branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  staged=$(git diff --cached --numstat 2>/dev/null | wc -l | tr -d ' ')
+  modified=$(git diff --numstat 2>/dev/null | wc -l | tr -d ' ')
+
+  git_str="$branch"
+  [ "$staged" -gt 0 ] && git_str="${git_str} $(printf "${GREEN}+${staged}${RESET}")"
+  [ "$modified" -gt 0 ] && git_str="${git_str} $(printf "${YELLOW}~${modified}${RESET}")"
+else
+  git_str="no branch"
+fi
+
+
+if [ -n "$total_cost" ]; then
+  cost_display=$(awk "BEGIN { printf \"%.2f\", $total_cost }")
+  block_str="\$${cost_display}"
+else
+  block_str="\$0.00"
+fi
+
+make_bar() {
+  pct="$1"
+  width=10
+  filled=$(( pct * width / 100 ))
+  empty=$(( width - filled ))
+  bar=""
+  i=0
+  while [ $i -lt $filled ]; do bar="${bar}█"; i=$(( i + 1 )); done
+  while [ $i -lt $width ];  do bar="${bar}░"; i=$(( i + 1 )); done
+  printf "%s" "$bar"
+}
+
+format_rl() {
+  pct="$1"
+  reset_ts="$2"
+  label="$3"
+  [ -z "$pct" ] && return
+  if [ "$pct" -ge 90 ]; then color="$RED"
+  elif [ "$pct" -ge 70 ]; then color="$YELLOW"
+  else color="$GREEN"
   fi
-  ctx_display="${used_fmt}% of ${ctx_total_fmt}"
+  reset_time=$(date -r "$reset_ts" "+%-I:%M%p" 2>/dev/null || date -d "@$reset_ts" "+%-I:%M%p" 2>/dev/null)
+  bar=$(make_bar "$pct")
+  printf "${color}${label} ${bar} ${pct}%% resets ${reset_time}${RESET}"
+}
+
+rate_limit_str=""
+rate_limit_str="${rate_limit_str}$(format_rl "$rl_5h_pct" "$rl_5h_reset" "5h")"
+# rate_limit_str="${rate_limit_str}$(format_rl "$rl_7d_pct" "$rl_7d_reset" "7d")"
+
+repo_root=$(cd "$current_dir" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null || echo "$current_dir")
+dir_display=$(basename "$repo_root")
+
+if [ -n "$effort" ]; then
+  printf "🤖 %s | 💪 %s | 🧠 %s | 💰 %s | ⏱️ %s\n📁 %s | 🌳 %s | 🌿 %s" "$model" "$effort" "$usage_str" "$block_str" "$rate_limit_str" "$dir_display" "$worktree_str" "$git_str"
+else
+  printf "🤖 %s | 🧠 %s | 💰 %s | ⏱️ %s\n📁 %s | 🌳 %s | 🌿 %s" "$model" "$usage_str" "$block_str" "$rate_limit_str" "$dir_display" "$worktree_str" "$git_str"
 fi
-
-# --- Timestamp ---
-timestamp=$(date +%H:%M:%S)
-
-# --- Assemble status line with ANSI colors ---
-# Colors (will be dimmed by the terminal):
-#   Cyan    = \033[36m
-#   Yellow  = \033[33m
-#   Green   = \033[32m
-#   Magenta = \033[35m
-#   Blue    = \033[34m
-#   Reset   = \033[0m
-
-parts=""
-
-# Directory
-parts="${parts}\033[36m${dir_display}\033[0m"
-
-# Git branch
-if [ -n "$git_branch" ]; then
-  parts="${parts}  \033[33m${git_branch}\033[0m"
-fi
-
-# Model
-if [ -n "$model" ]; then
-  parts="${parts}  \033[35m${model}\033[0m"
-fi
-
-# Context usage
-if [ -n "$ctx_display" ]; then
-  parts="${parts}  \033[32mctx: ${ctx_display}\033[0m"
-fi
-
-# Output token burn counter (last call output tokens as cost proxy)
-if [ -n "$output_tokens" ]; then
-  if [ "$output_tokens" -ge 1000 ] 2>/dev/null; then
-    out_fmt=$(echo "$output_tokens" | awk '{printf "%.1fk", $1/1000}')
-  else
-    out_fmt="${output_tokens}"
-  fi
-  parts="${parts}  \033[33mout: ${out_fmt}\033[0m"
-fi
-
-# Timestamp
-parts="${parts}  \033[34m${timestamp}\033[0m"
-
-printf "%b" "$parts"
